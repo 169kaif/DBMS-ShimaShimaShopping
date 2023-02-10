@@ -6,7 +6,8 @@ create Table Customer(
     customer_name varchar(50) not null,
     username varchar(50) not null unique,
     password varchar(50) not null,
-    phone_number varchar(20)
+    phone_number varchar(20),
+    address varchar(100)
 );
 
 create Table Checkout(
@@ -86,12 +87,4 @@ create Table items_contained(
     ic_name varchar(50) not null,
     ic_cost int not null,
     ic_quantity int
-);
-
-create Table home_address(
-    address_id int primary key not null auto_increment,
-    state varchar(50) not null,
-    street varchar(50),
-    pincode int not null,
-    foreign key (address_id) references Customer (customer_id)
 );
