@@ -19,7 +19,7 @@ create Table Checkout(
 );
 
 create Table Bill(
-    bill_number int primary key not null,
+    bill_number varchar(100) primary key not null,
     bill_generated int not null,
     foreign key (bill_generated) references Checkout (order_id),
     customer_name varchar(50) not null,
