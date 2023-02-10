@@ -73,7 +73,7 @@ add foreign key (cquantity) references Catalogue (quantity);
 
 create Table Employee(
     employee_id int primary key not null auto_increment,
-    superemployee_id int not null,
+    superemployee_id int,
     foreign key (superemployee_id) references Employee (employee_id),
     manage_cproduct_id int not null,
     foreign key (manage_cproduct_id) references Catalogue (cproduct_id),
