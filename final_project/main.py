@@ -53,7 +53,10 @@ while(True):
             while(True):
                 print("1.View Products")
                 print("2.View Order Details")
-                print("3.Sign Out")
+                print("3.Add Product to Cart")
+                print("4.Delete Product from Cart")
+                print("5.Checkout")
+                print("6.Sign Out")
 
                 y=int(input("Choose the option: "))
                 
@@ -91,7 +94,7 @@ while(True):
             print("Invalid UserName and Password")
 
     elif(x==3):
-        
+
         cursor.execute("Select product_id,product_name,cquantity from product where cquantity>0")
         record=cursor.fetchall()
         for row in record:
