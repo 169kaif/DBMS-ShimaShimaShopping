@@ -38,6 +38,12 @@ def ViewCart(customer_id):
         for k in row:
             print(k,end=" ")
         print()
+def DeleteProductFromCart(customer_id,product_id):
+    sql_statement="Delete from Cart where cart_customer_id=%s and references_product=%s "
+    t=(str(customer_id),str(product_id))
+    cursor.execute(sql_statement,t)
+    mydb.commit()
+
 
     
     
@@ -91,9 +97,11 @@ while(True):
                     AddToCart(prod_id,prod_quant,customer_id)
                 elif(y==4):
                     ViewCart(customer_id)
+                elif(y==5):
+                    prod_id=int(input("Enter Product ID: "))
+                    DeleteProductFromCart(customer_id,prod_id)
                 else:
                     break
-
 
         else:
             print("Invalid Username or Password")
