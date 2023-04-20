@@ -87,6 +87,41 @@ def updateQuantityCatalogue():
     quantity=input("Enter Quantity: ")
     cursor.execute("update catalogue set catalogue.quantity=%s where catalogue.cproduct_id=%s",(quantity,p_id))
     mydb.commit()
+
+def DeleteProductFromCart(customer_id,product_id):
+    sql_statement="Delete from Cart where cart_customer_id=%s and references_product=%s "
+    t=(str(customer_id),str(product_id))
+    cursor.execute(sql_statement,t)
+    mydb.commit()
+
+def Get_Quantity(product_id):
+    sql_statement="select quantity from cart where references_product=%s"
+    val=tuple(str(product_id))
+    cursor.execute(sql_statement,val)
+    record=cursor.fetchall()
+    return int(record[0][0])
+def Get_Cost(product_id):
+    sql_statement="select cost from Product where product_id=%s"
+    val=tuple(str(product_id))
+    cursor.execute(sql_statement,val)
+    record=cursor.fetchall()
+    return int(record[0][0])
+
+def CheckOut(customer_id):
+    print("HELLO WORLD")
+
+def get_Highest_bill_Number():
+    sql_statement="select bill_number from BILL"
+    cursor.execute(sql_statement)
+    record=cursor.fetchall()
+    l=[]
+    for i in record:
+        l.append(int(i[0]))
+    return max(l)+1
+
+def CheckOut(customer_id):
+    sql_statement="select "
+    
     
 while(True):
 
@@ -138,8 +173,15 @@ while(True):
                     addToCart(prod_id,prod_quant,customer_id)
                 elif(y==4):
                     viewCart(customer_id)
+                elif(y==5):
+                    prod_id=int(input("ENTER PRODUCT ID: "))
+                    DeleteProductFromCart(customer_id,prod_id)
+                elif(y==6):
+                    CheckOut(customer_id)
                 else:
                     break
+                    
+
 
 
         else:
