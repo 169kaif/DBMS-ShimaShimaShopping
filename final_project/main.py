@@ -1,13 +1,17 @@
+import imp
 from itertools import product
 from lib2to3.pgen2.token import NEWLINE
 from math import prod
+import random
+from re import S
+from tarfile import RECORDSIZE
 from tkinter import CURRENT
 import mysql.connector
 
 mydb=mysql.connector.connect(
     host="localhost",
     user="root",
-    password="root",
+    password="Navprajna1609",
     database="bigbang"
 )
 cursor=mydb.cursor()
@@ -18,7 +22,7 @@ def viewProducts():
     for row in record:
         print(row)
 
-def viewOrderDetails():
+def viewOrderDetails(customer_id):
     cursor.execute("Select order_id,total_price,delivery_address from checkout where customer_orderinfo=%s ",tuple(str(customer_id)))
     record=cursor.fetchall()
     for row in record:
@@ -52,40 +56,22 @@ def addToCatalogue():
     p_quantity=input("Enter Product Quantity: ")
     p_restock=input("Enter Product Restock Trigger: ")
 
-    #Writing query to find out max value in cproduct_id column to avoid duplicate entries
-    cursor.execute("select max(cproduct_id) from catalogue")
-    record=cursor.fetchall()
-    max_value=record[0][0]+1
-
-    cursor.execute("insert into product(product_id) values(%s)",(p_id,))
-    mydb.commit()
-
-    cursor.execute("insert into catalogue(cproduct_id,eproduct_id,quantity) values(%s,%s,%s)",(max_value,p_id,p_quantity))
-    mydb.commit()
-
-    #Finding out product_id of the product just added and adding rest of the details
-    cursor.execute("select product_id from product where product_id=%s",(p_id,))
-    record=cursor.fetchall()
-
-    #Finding row in product with product_id=p_id and adding rest of the details
-    cursor.execute("update product set product_name=%s,cquantity=%s,product_description=%s,cost=%s,restock_trigger=%s where product_id=%s",(p_name,p_quantity,p_description,p_cost,p_restock,p_id))
+    #Inserting into product table
+    cursor.execute("insert into product values(%s,%s,%s,%s,%s,%s)",(p_id,p_quantity,p_name,p_description,p_cost,p_restock))
     mydb.commit()
 
 def deleteFromCatalogue():
     p_id=input("Enter Product ID: ")
-
-    #Deleting from catalogue table
-    cursor.execute("delete from catalogue where eproduct_id=%s",(p_id,))
-    mydb.commit()
 
     #Deleting from product table
     cursor.execute("delete from product where product_id=%s",(p_id,))
     mydb.commit()
 
 def updateQuantityCatalogue():
-    p_id=input("Enter Product ID: ")
-    quantity=input("Enter Quantity: ")
-    cursor.execute("update catalogue set catalogue.quantity=%s where catalogue.cproduct_id=%s",(quantity,p_id))
+    p_id = input("Enter Product ID: ")
+    quantity = input("Enter Quantity: ")
+    # Updating quantity in product table
+    cursor.execute("UPDATE product SET quantity=%s WHERE product_id=%s", (quantity, p_id))
     mydb.commit()
 
 def DeleteProductFromCart(customer_id,product_id):
@@ -94,9 +80,9 @@ def DeleteProductFromCart(customer_id,product_id):
     cursor.execute(sql_statement,t)
     mydb.commit()
 
-def Get_Quantity(product_id):
-    sql_statement="select quantity from cart where references_product=%s"
-    val=tuple(str(product_id))
+def Get_Quantity(product_id,car_customer_id):
+    sql_statement="select quantity from cart where references_product=%s and cart_customer_id=%s"
+    val=tuple(str(product_id),str(car_customer_id))
     cursor.execute(sql_statement,val)
     record=cursor.fetchall()
     return int(record[0][0])
@@ -107,9 +93,6 @@ def Get_Cost(product_id):
     record=cursor.fetchall()
     return int(record[0][0])
 
-def CheckOut(customer_id):
-    print("HELLO WORLD")
-
 def get_Highest_bill_Number():
     sql_statement="select bill_number from BILL"
     cursor.execute(sql_statement)
@@ -119,8 +102,88 @@ def get_Highest_bill_Number():
         l.append(int(i[0]))
     return max(l)+1
 
+def get_Latest_Order_Id():
+    sql_statement="select order_id from checkout"
+    cursor.execute(sql_statement)
+    record=cursor.fetchall()
+    l=[]
+    for i in record:
+        l.append(int(i[0]))
+    return max(l)+1
+def get_ADDRESS(customer_id):
+    sql_statement="select address from customer where customer_id=%s"
+    val=tuple(str(customer_id),)
+    cursor.execute(sql_statement,val)
+    record=cursor.fetchall()
+    return record[0][0]
+def get_Name(customer_id):
+    sql_statement="select customer_name from customer where customer_id=%s"
+    val=tuple((str(customer_id),))
+    cursor.execute(sql_statement,val)
+    record=cursor.fetchall()
+    return record[0][0]
+def get_RAND_Payment():
+    l=["UPI","COD","DEBIT CARD","NET BANKING","CREDIT CARD"]
+    r=random.randint(1,5)
+    return l[4%r]
+def get_item_name(Prod_id):
+    sql_statement="select product_name from product where product_id=%s"
+    t=tuple(str(Prod_id),)
+    cursor.execute(sql_statement,t)
+    record=cursor.fetchall()
+    return record[0][0]
+
 def CheckOut(customer_id):
-    sql_statement="select "
+    sql_statement="select references_product,quantity from cart where cart_customer_id=%s"
+    val=tuple(str(customer_id),)
+    cursor.execute(sql_statement,val)
+    record=cursor.fetchall()
+    Items=[]
+    Qu=[]
+    Pr=[]
+    for i in record:
+        Items.append(str(i[0]))
+        print(i[1])
+        Qu.append(str(i[1]))
+        Pr.append(str(Get_Cost(i[0])))
+        DeleteProductFromCart(customer_id,i[0])
+    O_id=[]
+    total_price=[]
+    for i in range(len(Items)):
+        s_2="Insert into Checkout (order_id,customer_orderinfo,total_price,delivery_address) values(%s,%s,%s,%s)"
+        o1=str(get_Latest_Order_Id())
+        O_id.append(str(o1))
+        tp=str(int(Qu[i])*int(Pr[i]))
+        total_price.append(str(tp))
+        add=get_ADDRESS(customer_id)
+        t=(o1,str(customer_id),tp,add)
+        cursor.execute(s_2,t)
+    mydb.commit()
+    rand_payment=get_RAND_Payment()
+    name=get_Name(customer_id)
+    add=get_ADDRESS(customer_id)
+    for i in range(len(Items)):
+        bill_num=str(get_Highest_bill_Number())
+        bill_gen=O_id[i]
+        s_3="Insert into Bill (bill_number,bill_generated,customer_name,total_cost,address,payment_mode) values(%s,%s,%s,%s,%s,%s)"
+        t=(bill_num,bill_gen,name,str(float(total_price[i])),add,rand_payment)
+        cursor.execute(s_3,t)
+    mydb.commit()
+    
+    for i in range(len(Items)):
+        s_4="Insert into items_contained (ic_product_id,ic_name,ic_cost,ic_quantity) values(%s,%s,%s,%s)"
+        t=(O_id[i],get_item_name(Items[i]),Pr[i],Qu[i])
+        cursor.execute(s_4,t)
+    mydb.commit()
+
+        
+        
+        
+        
+        
+    
+
+
     
     
 while(True):
@@ -162,9 +225,9 @@ while(True):
                 y=int(input("Choose the option: "))
                 
                 if(y==1):
-                    viewProducts()
+                    viewProducts(customer_id)
                 elif(y==2):
-                    viewOrderDetails()
+                    viewOrderDetails(customer_id)
                 elif(y==3):
                     prod_id=int(input("ENTER PRODUCT ID: "))
                     prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
