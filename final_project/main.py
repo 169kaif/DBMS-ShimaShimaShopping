@@ -1,10 +1,12 @@
+from itertools import product
 from lib2to3.pgen2.token import NEWLINE
+from math import prod
 from tkinter import CURRENT
 import mysql.connector
 mydb=mysql.connector.connect(
     host="localhost",
     user="root",
-    password="root",
+    password="Navprajna1609",
     database="bigbang"
 )
 cursor=mydb.cursor()
@@ -22,7 +24,23 @@ def viewOrderDetails():
         for k in row:
             print(k,end=" ")
         print()
+def AddToCart(product_id,quantity,customer_id):
+    sql_statement="Insert into Cart(cart_customer_id,references_product,quantity) values(%s,%s,%s)"
+    t=(str(customer_id),str(product_id),str(quantity))
+    cursor.execute(sql_statement,t)
+    mydb.commit()
+def ViewCart(customer_id):
+    sql_statement="Select references_product,quantity from cart where cart_customer_id=%s"
+    cursor.execute(sql_statement,tuple(str(customer_id)))
+    record=cursor.fetchall()
+    print("Product_ID Quantity")
+    for row in record:
+        for k in row:
+            print(k,end=" ")
+        print()
 
+    
+    
 while(True):
 
     print("Welcome to ShimaShima")
@@ -54,9 +72,10 @@ while(True):
                 print("1.View Products")
                 print("2.View Order Details")
                 print("3.Add Product to Cart")
-                print("4.Delete Product from Cart")
-                print("5.Checkout")
-                print("6.Sign Out")
+                print("4.View Cart")
+                print("5.Delete Product from Cart")
+                print("6.Checkout")
+                print("7.Sign Out")
 
                 y=int(input("Choose the option: "))
                 
@@ -65,9 +84,16 @@ while(True):
                 elif(y==2):
                     viewOrderDetails()
                 elif(y==3):
-                    break
+                    prod_id=int(input("ENTER PRODUCT ID: "))
+                    prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
+                    while(prod_quant>=3):
+                        prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
+                    AddToCart(prod_id,prod_quant,customer_id)
+                elif(y==4):
+                    ViewCart(customer_id)
                 else:
                     break
+
 
         else:
             print("Invalid Username or Password")
