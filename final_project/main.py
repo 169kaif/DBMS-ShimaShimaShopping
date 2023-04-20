@@ -3,10 +3,11 @@ from lib2to3.pgen2.token import NEWLINE
 from math import prod
 from tkinter import CURRENT
 import mysql.connector
+
 mydb=mysql.connector.connect(
     host="localhost",
     user="root",
-    password="Navprajna1609",
+    password="root",
     database="bigbang"
 )
 cursor=mydb.cursor()
@@ -24,12 +25,14 @@ def viewOrderDetails():
         for k in row:
             print(k,end=" ")
         print()
-def AddToCart(product_id,quantity,customer_id):
+
+def addToCart(product_id,quantity,customer_id):
     sql_statement="Insert into Cart(cart_customer_id,references_product,quantity) values(%s,%s,%s)"
     t=(str(customer_id),str(product_id),str(quantity))
     cursor.execute(sql_statement,t)
     mydb.commit()
-def ViewCart(customer_id):
+
+def viewCart(customer_id):
     sql_statement="Select references_product,quantity from cart where cart_customer_id=%s"
     cursor.execute(sql_statement,tuple(str(customer_id)))
     record=cursor.fetchall()
@@ -38,14 +41,52 @@ def ViewCart(customer_id):
         for k in row:
             print(k,end=" ")
         print()
-def DeleteProductFromCart(customer_id,product_id):
-    sql_statement="Delete from Cart where cart_customer_id=%s and references_product=%s "
-    t=(str(customer_id),str(product_id))
-    cursor.execute(sql_statement,t)
+
+def addToCatalogue():    
+
+    #Taking product details as input
+    p_id=input("Enter Product ID: ")
+    p_name=input("Enter Product Name: ")
+    p_description=input("Enter Product Description: ")
+    p_cost=input("Enter Product Cost: ")
+    p_quantity=input("Enter Product Quantity: ")
+    p_restock=input("Enter Product Restock Trigger: ")
+
+    #Writing query to find out max value in cproduct_id column to avoid duplicate entries
+    cursor.execute("select max(cproduct_id) from catalogue")
+    record=cursor.fetchall()
+    max_value=record[0][0]+1
+
+    cursor.execute("insert into product(product_id) values(%s)",(p_id,))
     mydb.commit()
 
+    cursor.execute("insert into catalogue(cproduct_id,eproduct_id,quantity) values(%s,%s,%s)",(max_value,p_id,p_quantity))
+    mydb.commit()
 
-    
+    #Finding out product_id of the product just added and adding rest of the details
+    cursor.execute("select product_id from product where product_id=%s",(p_id,))
+    record=cursor.fetchall()
+
+    #Finding row in product with product_id=p_id and adding rest of the details
+    cursor.execute("update product set product_name=%s,cquantity=%s,product_description=%s,cost=%s,restock_trigger=%s where product_id=%s",(p_name,p_quantity,p_description,p_cost,p_restock,p_id))
+    mydb.commit()
+
+def deleteFromCatalogue():
+    p_id=input("Enter Product ID: ")
+
+    #Deleting from catalogue table
+    cursor.execute("delete from catalogue where eproduct_id=%s",(p_id,))
+    mydb.commit()
+
+    #Deleting from product table
+    cursor.execute("delete from product where product_id=%s",(p_id,))
+    mydb.commit()
+
+def updateQuantityCatalogue():
+    p_id=input("Enter Product ID: ")
+    quantity=input("Enter Quantity: ")
+    cursor.execute("update catalogue set catalogue.quantity=%s where catalogue.cproduct_id=%s",(quantity,p_id))
+    mydb.commit()
     
 while(True):
 
@@ -94,14 +135,12 @@ while(True):
                     prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
                     while(prod_quant>=3):
                         prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
-                    AddToCart(prod_id,prod_quant,customer_id)
+                    addToCart(prod_id,prod_quant,customer_id)
                 elif(y==4):
-                    ViewCart(customer_id)
-                elif(y==5):
-                    prod_id=int(input("Enter Product ID: "))
-                    DeleteProductFromCart(customer_id,prod_id)
+                    viewCart(customer_id)
                 else:
                     break
+
 
         else:
             print("Invalid Username or Password")
@@ -114,16 +153,22 @@ while(True):
         cursor.execute("select employee_username,employee_password from employee")
         record=cursor.fetchall()
         if(u_e,p_e) in record:
-            print("1.Change product quantity ")
-            print("2.Exit")
-            y=int(input("Enter The Option: "))
-            if(y==1):
-                p_id=input("Enter Product_id: ")
-                quantity=input("Enter Quantity: ")
-                cursor.execute("update catalogue set catalogue.quantity=%s where catalogue.cproduct_id=%s",(quantity,p_id))
-                mydb.commit()
-            else:
-                break
+            while(True):
+
+                print("1.Add Product")
+                print("2.Delete Product")
+                print("3.Change product quantity ")
+                print("4.Exit")
+                y=int(input("Enter The Option: "))
+
+                if(y==1):
+                    addToCatalogue()
+                elif(y==2):
+                    deleteFromCatalogue()
+                elif(y==3):
+                    updateQuantityCatalogue()
+                else:
+                    break
         else:
             print("Invalid UserName and Password")
 
