@@ -12,7 +12,7 @@ mydb=mysql.connector.connect(
     host="localhost",
     user="root",
     password="Navprajna1609",
-    database="bigbang"
+    database="newbigbang"
 )
 cursor=mydb.cursor()
 
@@ -71,7 +71,7 @@ def updateQuantityCatalogue():
     p_id = input("Enter Product ID: ")
     quantity = input("Enter Quantity: ")
     # Updating quantity in product table
-    cursor.execute("UPDATE product SET quantity=%s WHERE product_id=%s", (quantity, p_id))
+    cursor.execute("UPDATE product SET cquantity=%s WHERE product_id=%s", (quantity, p_id))
     mydb.commit()
 
 def DeleteProductFromCart(customer_id,product_id):
@@ -231,7 +231,7 @@ while(True):
                 elif(y==3):
                     prod_id=int(input("ENTER PRODUCT ID: "))
                     prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
-                    while(prod_quant>=3):
+                    while(prod_quant>3):
                         prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
                     addToCart(prod_id,prod_quant,customer_id)
                 elif(y==4):
