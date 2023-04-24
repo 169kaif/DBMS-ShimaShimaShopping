@@ -87,9 +87,9 @@ def Get_Quantity(product_id,car_customer_id):
     record=cursor.fetchall()
     return int(record[0][0])
 def Get_Cost(product_id):
-    sql_statement="select cost from Product where product_id=%s"
-    val=tuple(str(product_id))
-    cursor.execute(sql_statement,val)
+    sql_statement1="select cost from Product where product_id=%s"
+    val=(str(product_id),)
+    cursor.execute(sql_statement1,val)
     record=cursor.fetchall()
     return int(record[0][0])
 
@@ -127,9 +127,9 @@ def get_RAND_Payment():
     r=random.randint(1,5)
     return l[4%r]
 def get_item_name(Prod_id):
-    sql_statement="select product_name from product where product_id=%s"
-    t=tuple(str(Prod_id),)
-    cursor.execute(sql_statement,t)
+    sql_statement_get_item_name="select product_name from product where product_id=%s"
+    rand_t_1=(str(Prod_id),)
+    cursor.execute(sql_statement_get_item_name,rand_t_1)
     record=cursor.fetchall()
     return record[0][0]
 
@@ -143,9 +143,9 @@ def CheckOut(customer_id):
     Pr=[]
     for i in record:
         Items.append(str(i[0]))
-        print(i[1])
         Qu.append(str(i[1]))
-        Pr.append(str(Get_Cost(i[0])))
+        c=Get_Cost(i[0])
+        Pr.append(str(c))
         DeleteProductFromCart(customer_id,i[0])
     O_id=[]
     total_price=[]
@@ -172,8 +172,9 @@ def CheckOut(customer_id):
     
     for i in range(len(Items)):
         s_4="Insert into items_contained (ic_product_id,ic_name,ic_cost,ic_quantity) values(%s,%s,%s,%s)"
-        t=(O_id[i],get_item_name(Items[i]),Pr[i],Qu[i])
-        cursor.execute(s_4,t)
+        item_name=get_item_name(Items[i])
+        t2=(O_id[i],item_name,Pr[i],Qu[i],)
+        cursor.execute(s_4,t2)
     mydb.commit()
 
         
@@ -210,7 +211,6 @@ while(True):
             record=cursor.fetchall()
             customer_name=record[0][1]
             customer_id=record[0][0]
-            print(record)
             print("Welcome Back ",customer_name)
 
             while(True):
@@ -225,15 +225,18 @@ while(True):
                 y=int(input("Choose the option: "))
                 
                 if(y==1):
-                    viewProducts(customer_id)
+                    viewProducts()
                 elif(y==2):
                     viewOrderDetails(customer_id)
                 elif(y==3):
-                    prod_id=int(input("ENTER PRODUCT ID: "))
-                    prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
-                    while(prod_quant>3):
-                        prod_quant=int(input("Enter product Quantity(max quantity is 3!): "))
-                    addToCart(prod_id,prod_quant,customer_id)
+                    try:
+                        prod_id=int(input("ENTER PRODUCT ID: "))
+                        prod_quant=int(input("Enter product Quantity(max quantity is 100!): "))
+                        while(prod_quant>10000):
+                            prod_quant=int(input("Enter product Quantity(max quantity is 10!): "))
+                        addToCart(prod_id,prod_quant,customer_id)
+                    except:
+                        print("INVALID INFORMATION")
                 elif(y==4):
                     viewCart(customer_id)
                 elif(y==5):
