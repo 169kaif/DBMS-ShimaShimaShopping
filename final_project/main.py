@@ -110,22 +110,26 @@ def get_Latest_Order_Id():
     for i in record:
         l.append(int(i[0]))
     return max(l)+1
+
 def get_ADDRESS(customer_id):
     sql_statement="select address from customer where customer_id=%s"
     val=tuple(str(customer_id),)
     cursor.execute(sql_statement,val)
     record=cursor.fetchall()
     return record[0][0]
+
 def get_Name(customer_id):
     sql_statement="select customer_name from customer where customer_id=%s"
     val=tuple((str(customer_id),))
     cursor.execute(sql_statement,val)
     record=cursor.fetchall()
     return record[0][0]
+
 def get_RAND_Payment():
     l=["UPI","COD","DEBIT CARD","NET BANKING","CREDIT CARD"]
     r=random.randint(1,5)
     return l[4%r]
+
 def get_item_name(Prod_id):
     sql_statement_get_item_name="select product_name from product where product_id=%s"
     rand_t_1=(str(Prod_id),)
@@ -232,6 +236,7 @@ while(True):
             print("Welcome Back ",customer_name)
 
             while(True):
+
                 print("1.View Products")
                 print("2.View Order Details")
                 print("3.Add Product to Cart")
