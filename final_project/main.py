@@ -254,8 +254,8 @@ while(True):
                 elif(y==3):
                     try:
                         prod_id=int(input("ENTER PRODUCT ID: "))
-                        prod_quant=int(input("Enter product Quantity(max quantity is 100!): "))
-                        while(prod_quant>10000):
+                        prod_quant=int(input("Enter product Quantity(max quantity is 10!): "))
+                        while(prod_quant>10):
                             prod_quant=int(input("Enter product Quantity(max quantity is 10!): "))
                         addToCart(prod_id,prod_quant,customer_id)
                     except:
