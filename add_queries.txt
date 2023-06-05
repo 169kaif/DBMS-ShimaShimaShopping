@@ -1,0 +1,74 @@
+1)Mapping cquantity from Product to quantity from Catalogue by comparing product IDs
+
+Utilizes UPDATE AND JOIN
+
+UPDATE Product p
+JOIN Catalogue c ON p.product_id = c.eproduct_id
+SET p.cquantity = c.quantity;
+
+use ShimaShima;
+2)we get the customer name and  the product each customer has bought
+
+select customer_name,P.product_name from Customer join Cart C on Customer.customer_id = C.cart_customer_id join Product P on P.composed_of=C.cart_customer_id;
+
+3)we get the customer name and the product each customer has bough which falls under the description of Snacks
+
+select customer_name,P.product_name from Customer join Cart C on Customer.customer_id = C.cart_customer_id join Product P on P.composed_of=C.cart_customer_id where P.product_description='Snacks';
+
+4)we get the customer details such as their name,order id,payment mode,bill number along with the delivery address
+
+select Customer.customer_name,C.order_id,B.payment_mode,B.bill_number,C.delivery_address  from Customer join Checkout C on Customer.customer_id = C.customer_orderinfo JOIN Bill B on C.order_id = B.bill_generated;
+
+5)here we just add a check condition if the product that is being added has a postive and greater than 0 cost
+
+alter TABLE Product add CHECK (cost>0);
+
+6)we get the customer_id along with customer_name and the total amount the customer has spent in this platform.
+
+select customer_id,customer_name,sum(C.total_price) as Total_Amount from Customer join Checkout C on Customer.customer_id = C.customer_orderinfo group by customer_orderinfo, customer_name;
+
+7)we get the list of all the products along with its product_id,product_name alogn with the category it falls under including the category id and category name
+
+select product_id,product_name,category_name,category_id from Category JOIN Product on product_description=category_name;
+
+8)Used a query utilizing NOT EXIST to check if a customer has not placed any order at all
+
+Also a nested query
+
+SELECT * FROM Customer c
+WHERE NOT EXISTS(SELECT * FROM Checkout ch WHERE ch.customer_orderinfo = c.customer_id);
+
+9) Used a query that returns a table containing the number of orders placed by a customer if any
+
+Utilizes Count
+
+SELECT customer_orderinfo, COUNT(order_id) as num_orders
+FROM Checkout
+GROUP BY customer_orderinfo;
+
+10) Used a query that selects orders pertaining to a specific customer with the order value LESS THAN a specific value or GREATER THAN a specific value
+
+Utilizes AND and OR
+
+SELECT *
+FROM Checkout
+WHERE customer_orderinfo = 2
+  AND (total_price < 80000 OR total_price > 100000);
+
+
+
+TO VIEW THE CONSTRAINTS, WE CAN USE THE FOLLOWING:
+
+USE ShimaShima;
+desc Category;
+desc Product;
+desc items_contained;
+desc Catalogue; 
+desc Customer;
+desc Checkout;
+desc products_contained;
+desc Employee;
+desc Cart;
+desc Bill;
+
+THANK YOU!
